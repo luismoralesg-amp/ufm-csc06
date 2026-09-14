@@ -11,50 +11,61 @@ una API key gratuita (sin tarjeta):
 
 Documentacion oficial: https://ai.google.dev/gemini-api/docs
 """
-
+from api_key import API_KEY 
 import requests
 
 # Pega aqui tu API key (la que copiaste de Google AI Studio).
-API_KEY = ""
-
+#Constantes
+VERBOSE = True
 MODEL = "gemini-3.6-flash"
 URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent"
 
-# A diferencia de PokeAPI, aqui la key no va en la URL: va en un header.
-# Poner credenciales en la URL es mala practica (queda en logs, historial
-# del navegador, etc.), asi que Gemini pide mandarla en un header aparte.
+print (f"\n========================")
+print (f"Gemini  Model:{MODEL}  ")
+print (f"API_KEY: {API_KEY}")
+print (f"\n========================")
+
+
+
+# Construir API KEY
 headers = {
     "Content-Type": "application/json",
     "x-goog-api-key": API_KEY,
 }
 
-# El "cuerpo" (body) de la peticion: aqui va el prompt.
-# Fijate que ya no es una URL con datos pegados, es JSON de verdad.
-body = {
-    "contents": [
-        {
-            "parts": [
-                {"text": "Desde cuando existe Pokemon?"}
+while True:
+    print(f"\n========== Gemini ===========")
+    user_prompt = input("En que piensas?: (ingresa tu prompt o 'salir' para terminar la sesion): ")
+
+    #Revisar si el usuario quiere salir
+    if user_prompt.lower().strip() == "salir":
+        print("\n Hasta luego!!")
+        break
+
+        #Construir body de request
+    body = {
+            "contents": [
+                {
+                    "parts": [
+                        {"text": user_prompt }
+                    ]
+                }
             ]
         }
-    ]
-}
 
-# Como el body no es un simple GET, usamos requests.post() y le pasamos
-# el diccionario de Python directo en json=... (requests lo convierte
-# a JSON por nosotros).
-respuesta = requests.post(URL, headers=headers, json=body)
+     #Realizar Request post
+    respuesta = requests.post(URL, headers=headers, json=body)
 
-print("Status code:", respuesta.status_code)
+    print("Status code:", respuesta.status_code)
 
-if respuesta.status_code != 200:
-    print("Algo salio mal:")
-    print(respuesta.text)
-else:
-    datos = respuesta.json()
+    if respuesta.status_code != 200:
+        print("Algo salio mal:")
+        print(respuesta.text)
+    else:
+        datos = respuesta.json()
 
-    # La respuesta de Gemini viene anidada varios niveles:
-    # datos -> candidates -> [0] -> content -> parts -> [0] -> text
-    texto = datos["candidates"][0]["content"]["parts"][0]["text"]
-    print("\nRespuesta de Gemini:\n")
-    print(texto)
+        # La respuesta de Gemini viene anidada varios niveles:
+         # datos -> candidates -> [0] -> content -> parts -> [0] -> text
+        respuesta_gemini = datos["candidates"][0]["content"]["parts"][0]["text"]
+        print("\nRespuesta de Gemini:\n")
+        print(respuesta_gemini)
